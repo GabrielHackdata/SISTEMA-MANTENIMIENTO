@@ -1,22 +1,177 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Dashboard Mantenimiento</title>
+  <title>Sistema de Mantenimiento</title>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body { margin:0; font-family: Arial; display:flex; }
+
+    /* MENU */
+    .menu {
+      width: 200px;
+      background: #1e1e2f;
+      color: white;
+      height: 100vh;
+      padding: 10px;
+    }
+
+    .menu button {
+      width:100%;
+      margin:5px 0;
+      padding:10px;
+      background:#2e2e48;
+      color:white;
+      border:none;
+      cursor:pointer;
+    }
+
+    .menu button:hover {
+      background:#3e3e60;
+    }
+
+    /* CONTENIDO */
+    .contenido {
+      flex:1;
+      padding:20px;
+    }
+
+    .seccion { display:none; }
+
+    /* FILTROS */
+    .filtros {
+      margin-bottom:15px;
+    }
+
+  </style>
 </head>
 
-<body style="font-family: Arial; text-align:center;">
+<body>
 
-  <iframe 
-  title="INDICADORES SUPERVISORES" 
-  width="600" 
-  height="373.5" 
-  src="https://app.powerbi.com/view?r=eyJrIjoiM2NlNGE4YzEtMjNmOC00OWUyLWJkNzYtMTc2MjFiMzAxNWMwIiwidCI6IjhmOWRmMjY3LWE4YTUtNDE2NC04YjFjLWUwYTQzNDU0YzdiYyJ9" 
-  frameborder="0" 
-  allowFullScreen="true">
-  
-  </iframe>
-  
-</body>
-</html>
+<!-- MENU -->
+<div class="menu">
+  <h3>Sistema</h3>
+  <button onclick="mostrar('dashboard')">Dashboard</button>
+  <button onclick="mostrar('mantenimiento')">Mantenimiento</button>
+  <button onclick="mostrar('costos')">Costos</button>
+  <button onclick="mostrar('recursos')">Recursos</button>
+</div>
 
+<!-- CONTENIDO -->
+<div class="contenido">
+
+  <!-- FILTROS -->
+  <div class="filtros">
+    Fecha Inicio: <input type="date" id="fechaInicio">
+    Fecha Fin: <input type="date" id="fechaFin">
+    Equipo: <input type="text" id="equipoFiltro" placeholder="Ej: Bomba1">
+    <button onclick="cargarTodo()">Aplicar</button>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboard" class="seccion">
+    <h2>Dashboard General</h2>
+    <canvas id="graficoDispo"></canvas>
+    <canvas id="graficoMTTR"></canvas>
+  </div>
+
+  <!-- MANTENIMIENTO -->
+  <div id="mantenimiento" class="seccion">
+    <h2>Mantenimiento</h2>
+    <canvas id="graficoTipo"></canvas>
+    <canvas id="graficoPareto"></canvas>
+  </div>
+
+  <!-- COSTOS -->
+  <div id="costos" class="seccion">
+    <h2>Costos</h2>
+    <canvas id="graficoCostos"></canvas>
+  </div>
+
+  <!-- RECURSOS -->
+  <div id="recursos" class="seccion">
+    <h2>Recursos</h2>
+    <canvas id="graficoHH"></canvas>
+  </div>
+
+</div>
+
+<script>
+
+// 🔥 API (PON TU API)
+const API_URL = "https://sheetdb.io/api/v1/TU_API";
+
+// CONTROL DE GRAFICOS
+let charts = {};
+
+function destruirGrafico(id){
+  if(charts[id]) charts[id].destroy();
+}
+
+// CAMBIAR SECCION
+function mostrar(sec){
+  document.querySelectorAll('.seccion').forEach(s => s.style.display="none");
+  document.getElementById(sec).style.display = "block";
+}
+
+// FILTRAR DATOS
+function filtrarDatos(datos){
+  let fInicio = document.getElementById("fechaInicio").value;
+  let fFin = document.getElementById("fechaFin").value;
+  let equipo = document.getElementById("equipoFiltro").value;
+
+  return datos.filter(d => {
+    let fecha = d.Fecha;
+    let ok = true;
+
+    if (fInicio) ok = ok && fecha >= fInicio;
+    if (fFin) ok = ok && fecha <= fFin;
+    if (equipo) ok = ok && d.Equipo.includes(equipo);
+
+    return ok;
+  });
+}
+
+// 📊 CARGAR TODO
+async function cargarTodo(){
+  const res = await fetch(API_URL);
+  let datos = await res.json();
+
+  datos = filtrarDatos(datos);
+
+  dashboard(datos);
+  mantenimiento(datos);
+  costos(datos);
+  recursos(datos);
+}
+
+// DASHBOARD
+function dashboard(datos){
+
+  let mttr = datos.reduce((a,b)=>a + Number(b.Horas),0)/datos.length || 0;
+  let disponibilidad = 100 - mttr;
+
+  destruirGrafico("dispo");
+  charts["dispo"] = new Chart(graficoDispo, {
+    type:"bar",
+    data:{labels:["Disponibilidad"], datasets:[{data:[disponibilidad], backgroundColor:["green"]}]}
+  });
+
+  destruirGrafico("mttr");
+  charts["mttr"] = new Chart(graficoMTTR,{
+    type:"bar",
+    data:{labels:["MTTR"], datasets:[{data:[mttr], backgroundColor:["red"]}]}
+  });
+}
+
+// MANTENIMIENTO
+function mantenimiento(datos){
+
+  let prev = 0, corr = 0;
+  datos.forEach(d=>{
+    if(d.Tipo==="Preventivo") prev++;
+    else corr++;
+  });
 
