@@ -2,37 +2,21 @@
 <html>
 <head>
   <title>Dashboard Mantenimiento</title>
-
-  <!-- ✅ ESTO ES CLAVE -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body style="font-family: Arial; text-align:center;">
 
-<h1>Dashboard de Mantenimiento</h1>
-
-<canvas id="grafico" width="400" height="200"></canvas>
-
-<script>
-
-let abiertas = 4;
-let cerradas = 6;
-
-const ctx = document.getElementById('grafico');
-
-new Chart(ctx, {
-  type: 'bar',
-  data: {
-    labels: ['Abiertas', 'Cerradas'],
-    datasets: [{
-      label: 'Órdenes de Trabajo',
-      data: [abiertas, cerradas],
-      backgroundColor: ['red', 'green']
-    }]
-  }
-});
-
-</script>
-
+  <iframe 
+  title="INDICADORES SUPERVISORES" 
+  width="600" 
+  height="373.5" 
+  src="https://app.powerbi.com/view?r=eyJrIjoiM2NlNGE4YzEtMjNmOC00OWUyLWJkNzYtMTc2MjFiMzAxNWMwIiwidCI6IjhmOWRmMjY3LWE4YTUtNDE2NC04YjFjLWUwYTQzNDU0YzdiYyJ9" 
+  frameborder="0" 
+  allowFullScreen="true">
+  
+  </iframe>
+  
 </body>
 </html>
+
+
