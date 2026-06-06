@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Mi Dashboard de Mantenimiento</title>
+  <title>Dashboard Mantenimiento</title>
 
-  <!-- Librería de gráficos -->
+  <!-- ✅ ESTO ES CLAVE -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
@@ -15,15 +15,9 @@
 
 <script>
 
-// 🔥 DATOS DE PRUEBA (luego los conectamos)
-let abiertas = 0;
-let cerradas = 0;
+let abiertas = 4;
+let cerradas = 6;
 
-// Simulación (puedes cambiar estos números)
-abiertas = 3;
-cerradas = 7;
-
-// Crear gráfico
 const ctx = document.getElementById('grafico');
 
 new Chart(ctx, {
